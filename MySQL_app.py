@@ -59,7 +59,7 @@ def add_book():
                 insert_query = f"INSERT INTO `books` (Title, Author, Genre, Year, Pages, Description) VALUES ('{value_Title}','{value_Author}','{value_Genre}','{value_Year}','{value_Pages}','{value_Description}');"
                 cursor.execute(insert_query)
                 connection.commit()
-                messagebox.showinfo("Добавление в базу данных", "Ученик успешно добавлен в базу данных")
+                messagebox.showinfo("Добавление в базу данных", "Книга успешно добавлена в базу данных")
         finally:
             #connection.close()
             all_clear_sucses()
@@ -113,6 +113,73 @@ def add_book():
     btn_add_student = tk.Button(new_win, text="Добавить книгу", command=add_db).grid(row=6, column=1, padx=10,pady=10, stick='we')
     btn_all_clear = tk.Button(new_win, text="Очистить", command=all_clear).grid(row=6, column=0, padx=10,pady=10, stick='we')
 
+def issue_book():
+    def Scankey(event):
+
+        val = event.widget.get()
+        print(val)
+
+        if val == '':
+            data = list_students
+        else:
+            data = []
+            for item in list_students:
+                if val.lower() in item.lower():
+                    data.append(item)
+
+        Update(data)
+
+    def Update(data):
+
+        listbox.delete(0, 'end')
+
+        # put new data
+        for item in data:
+            listbox.insert('end', item)
+
+    list_students = ('C', 'C++', 'Java',
+            'Python', 'Perl',
+            'PHP', 'ASP', 'JS')
+
+    list_books = ('C+++++', 'C++', 'Java',
+                     'Python', 'Perl',
+                     'PHP', 'ASP', 'JS')
+    list_Librarians = ('C+++++', 'C++', 'Java',
+                  'Python', 'Perl',
+                  'PHP', 'ASP', 'JS')
+
+    new_win = tk.Toplevel(win)
+    new_win.geometry("510x300+500+200")
+    new_win.title("Добавить книгу")
+
+    tk.Label(new_win, text='Выберите ученика').grid(row=0, column=0, padx=10, pady=5, stick='w')
+    entry = tk.Entry(new_win)
+    entry.grid(row=1, column=0, padx=10, pady=2, stick='w')
+    entry.bind('<KeyRelease>', Scankey)
+
+    listbox = tk.Listbox(new_win)
+    listbox.grid(row=2, column=0, padx=10, pady=2, stick='w')
+    Update(list_students)
+
+    tk.Label(new_win, text='Выберите книгу').grid(row=0, column=1, padx=10, pady=5, stick='w')
+    entry = tk.Entry(new_win)
+    entry.grid(row=1, column=1, padx=10, pady=2, stick='w')
+    entry.bind('<KeyRelease>', Scankey)
+
+    listbox = tk.Listbox(new_win)
+    listbox.grid(row=2, column=1, padx=10, pady=2, stick='w')
+    Update(list_books)
+
+    tk.Label(new_win, text='Выберите библиотекаря').grid(row=0, column=2, padx=10, pady=5, stick='w')
+    entry = tk.Entry(new_win)
+    entry.grid(row=1, column=2, padx=10, pady=2, stick='w')
+    entry.bind('<KeyRelease>', Scankey)
+
+    listbox = tk.Listbox(new_win)
+    listbox.grid(row=2, column=2, padx=10, pady=2, stick='w')
+    Update(list_Librarians)
+
+
 
 
 
@@ -123,7 +190,7 @@ win.geometry("340x280")
 win.title("База данных школьной библиотеки MySQL")
 btn_add_student=tk.Button(win, text="Добавить ученика",command=add_student).grid(row=0,column=0, padx=10, stick='we')
 btn_add_books=tk.Button(win, text="Добавить книгу",command=add_book).grid(row=1,column=0, padx=10, stick='we')
-btn_issue_book=tk.Button(win, text="Выдать книгу",command=add_student).grid(row=2,column=0, padx=10, stick='we')
+btn_issue_book=tk.Button(win, text="Выдать книгу",command=issue_book).grid(row=2,column=0, padx=10, stick='we')
 btn_remove_debtor=tk.Button(win, text="Удалить должника",command=add_student).grid(row=3,column=0, padx=10, stick='we')
 
 
