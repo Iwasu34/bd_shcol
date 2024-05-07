@@ -114,28 +114,43 @@ def add_book():
     btn_all_clear = tk.Button(new_win, text="Очистить", command=all_clear).grid(row=6, column=0, padx=10,pady=10, stick='we')
 
 def issue_book():
-    def Scankey(event):
+    # def Scankey_student(event):
+    #
+    #     val = event.widget.get()
+    #     print(val)
+    #
+    #     if val == '':
+    #         data = list_students
+    #     else:
+    #         data = []
+    #         for item in list_students:
+    #             if val.lower() in item.lower():
+    #                 data.append(item)
+    #
+    #     Update(data)
+    #
+    # def Scankey(event,*list_db):
+    #
+    #     val = event.widget.get()
+    #     print(val)
+    #
+    #     if val == '':
+    #         data = list_students
+    #     else:
+    #         data = []
+    #         for item in list_students:
+    #             if val.lower() in item.lower():
+    #                 data.append(item)
+    #
+    #     Update(data)
 
-        val = event.widget.get()
-        print(val)
-
-        if val == '':
-            data = list_students
-        else:
-            data = []
-            for item in list_students:
-                if val.lower() in item.lower():
-                    data.append(item)
-
-        Update(data)
-
-    def Update(data):
-
-        listbox.delete(0, 'end')
-
-        # put new data
-        for item in data:
-            listbox.insert('end', item)
+    # def Update(data):
+    #
+    #     listbox.delete(0, 'end')
+    #
+    #     # put new data
+    #     for item in data:
+    #         listbox.insert('end', item)
 
     list_students = ('C', 'C++', 'Java',
             'Python', 'Perl',
@@ -153,31 +168,31 @@ def issue_book():
     new_win.title("Добавить книгу")
 
     tk.Label(new_win, text='Выберите ученика').grid(row=0, column=0, padx=10, pady=5, stick='w')
-    entry = tk.Entry(new_win)
-    entry.grid(row=1, column=0, padx=10, pady=2, stick='w')
-    entry.bind('<KeyRelease>', Scankey)
+    entry_students = tk.Entry(new_win)
+    entry_students.grid(row=1, column=0, padx=10, pady=2, stick='w')
+    # entry_students.bind('<KeyRelease>', Scankey)
 
-    listbox = tk.Listbox(new_win)
-    listbox.grid(row=2, column=0, padx=10, pady=2, stick='w')
-    Update(list_students)
+#     listbox = tk.Listbox(new_win)
+#     listbox.grid(row=2, column=0, padx=10, pady=2, stick='w')
+#     Update(list_students)
 
     tk.Label(new_win, text='Выберите книгу').grid(row=0, column=1, padx=10, pady=5, stick='w')
     entry = tk.Entry(new_win)
     entry.grid(row=1, column=1, padx=10, pady=2, stick='w')
-    entry.bind('<KeyRelease>', Scankey)
+#     entry.bind('<KeyRelease>', Scankey)
 
-    listbox = tk.Listbox(new_win)
-    listbox.grid(row=2, column=1, padx=10, pady=2, stick='w')
-    Update(list_books)
+#     listbox = tk.Listbox(new_win)
+#     listbox.grid(row=2, column=1, padx=10, pady=2, stick='w')
+#     Update(list_books)
 
     tk.Label(new_win, text='Выберите библиотекаря').grid(row=0, column=2, padx=10, pady=5, stick='w')
     entry = tk.Entry(new_win)
     entry.grid(row=1, column=2, padx=10, pady=2, stick='w')
-    entry.bind('<KeyRelease>', Scankey)
+#     entry.bind('<KeyRelease>', Scankey)
 
-    listbox = tk.Listbox(new_win)
-    listbox.grid(row=2, column=2, padx=10, pady=2, stick='w')
-    Update(list_Librarians)
+#     listbox = tk.Listbox(new_win)
+#     listbox.grid(row=2, column=2, padx=10, pady=2, stick='w')
+    # Update(list_Librarians)
 
 
 
