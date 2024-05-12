@@ -1,7 +1,13 @@
+
+from datetime import timedelta, date, datetime
 import tkinter as tk
+from tkinter import ttk
+from tkinter import scrolledtext
 import pymysql
 from config import host, user, password, db_name
 from tkinter import messagebox
+import time
+
 def add_student():
     def add_db():
         value_first_name = First_name.get()
@@ -114,88 +120,118 @@ def add_book():
     btn_all_clear = tk.Button(new_win, text="Очистить", command=all_clear).grid(row=6, column=0, padx=10,pady=10, stick='we')
 
 def issue_book():
-    # def Scankey_student(event):
-    #
-    #     val = event.widget.get()
-    #     print(val)
-    #
-    #     if val == '':
-    #         data = list_students
-    #     else:
-    #         data = []
-    #         for item in list_students:
-    #             if val.lower() in item.lower():
-    #                 data.append(item)
-    #
-    #     Update(data)
-    #
-    # def Scankey(event,*list_db):
-    #
-    #     val = event.widget.get()
-    #     print(val)
-    #
-    #     if val == '':
-    #         data = list_students
-    #     else:
-    #         data = []
-    #         for item in list_students:
-    #             if val.lower() in item.lower():
-    #                 data.append(item)
-    #
-    #     Update(data)
+    def all_clear():
+        if messagebox.askokcancel("Очиститка", "Вы действительно хотите очистить все данные"):
+            entry_students.delete(0, 'end')
+            entry_books.delete(0, 'end')
+            entry_bibliotekrs.delete(0, 'end')
 
-    # def Update(data):
-    #
-    #     listbox.delete(0, 'end')
-    #
-    #     # put new data
-    #     for item in data:
-    #         listbox.insert('end', item)
+    def all_clear_sucses():
+        entry_students.delete(0, 'end')
+        entry_books.delete(0, 'end')
+        entry_bibliotekrs.delete(0, 'end')
 
-    list_students = ('C', 'C++', 'Java',
-            'Python', 'Perl',
-            'PHP', 'ASP', 'JS')
 
-    list_books = ('C+++++', 'C++', 'Java',
-                     'Python', 'Perl',
-                     'PHP', 'ASP', 'JS')
-    list_Librarians = ('C+++++', 'C++', 'Java',
-                  'Python', 'Perl',
-                  'PHP', 'ASP', 'JS')
 
     new_win = tk.Toplevel(win)
-    new_win.geometry("510x300+500+200")
+    new_win.geometry("810x300+500+200")
     new_win.title("Добавить книгу")
 
     tk.Label(new_win, text='Выберите ученика').grid(row=0, column=0, padx=10, pady=5, stick='w')
     entry_students = tk.Entry(new_win)
     entry_students.grid(row=1, column=0, padx=10, pady=2, stick='w')
-    # entry_students.bind('<KeyRelease>', Scankey)
 
-#     listbox = tk.Listbox(new_win)
-#     listbox.grid(row=2, column=0, padx=10, pady=2, stick='w')
-#     Update(list_students)
 
     tk.Label(new_win, text='Выберите книгу').grid(row=0, column=1, padx=10, pady=5, stick='w')
-    entry = tk.Entry(new_win)
-    entry.grid(row=1, column=1, padx=10, pady=2, stick='w')
-#     entry.bind('<KeyRelease>', Scankey)
+    entry_books = tk.Entry(new_win)
+    entry_books.grid(row=1, column=1, padx=10, pady=2, stick='w')
 
-#     listbox = tk.Listbox(new_win)
-#     listbox.grid(row=2, column=1, padx=10, pady=2, stick='w')
-#     Update(list_books)
 
     tk.Label(new_win, text='Выберите библиотекаря').grid(row=0, column=2, padx=10, pady=5, stick='w')
-    entry = tk.Entry(new_win)
-    entry.grid(row=1, column=2, padx=10, pady=2, stick='w')
-#     entry.bind('<KeyRelease>', Scankey)
+    entry_bibliotekrs = tk.Entry(new_win)
+    entry_bibliotekrs.grid(row=1, column=2, padx=10, pady=2, stick='w')
 
-#     listbox = tk.Listbox(new_win)
-#     listbox.grid(row=2, column=2, padx=10, pady=2, stick='w')
-    # Update(list_Librarians)
+    tk.Label(new_win, text='Дата выдачи').grid(row=0, column=3, padx=10, pady=5, stick='w')
+    named_tuple = time.localtime()  # получить struct_time
+    time_string = time.strftime("%d.%m.%Y", named_tuple)
+    entry_dateDue = tk.Entry(new_win)
+    entry_dateDue.insert(0,time_string)
+    entry_dateDue.grid(row=1, column=3, padx=10, pady=2)
+
+
+    tk.Label(new_win, text='Дата возврата').grid(row=0, column=4, padx=10, pady=5, stick='w')
+    end_date = (date.today() + timedelta(days=10)).strftime("%d.%m.%Y")
+    entry_dateOut = tk.Entry(new_win)
+    entry_dateOut.insert(0, end_date)
+    entry_dateOut.grid(row=1, column=4, padx=10, pady=2,stick='w')
+
+    def add_db():
+        value_student = entry_students.get()
+        value_book = entry_books.get()
+        value_bibliotekr = entry_bibliotekrs.get()
+        value_datedue = entry_dateDue.get()
+        date_obj = datetime.strptime(value_datedue, "%d.%m.%Y")
+        value_datedue = date_obj.strftime("%Y-%m-%d")
+        value_dateout = entry_dateOut.get()
+        date_obj = datetime.strptime(value_dateout, "%d.%m.%Y")
+        value_dateout = date_obj.strftime("%Y-%m-%d")
+        try:
+            with connection.cursor() as cursor:
+                query_student = f"SELECT Id FROM `students` WHERE `LastName` LIKE '{value_student}%'"
+                query_book = f"SELECT Id FROM `books` WHERE `Title` LIKE '{value_book}%'"
+                query_librarian = f"SELECT Id FROM `librarians` WHERE `LastName`  LIKE '{value_bibliotekr}%'"
+
+
+                cursor.execute(query_student)
+                result_student = cursor.fetchone().get("Id")
+                cursor.execute(query_book)
+                result_book = cursor.fetchone().get("Id")
+                cursor.execute(query_librarian)
+                result_librarian = cursor.fetchone().get("Id")
+                insert_query = f"INSERT INTO `loans` (StudentId, BookId, LibrariansId, DateOut, DateDue) VALUES ('{result_student}','{result_book}','{result_librarian}','{value_datedue}','{value_dateout}');"
+                cursor.execute(insert_query)
+                connection.commit()
+                messagebox.showinfo("Добавление в базу данных", "Выдача успешна добавлена в базу данных")
+        finally:
+            #connection.close()
+            all_clear_sucses()
+    btn_add_issue = tk.Button(new_win, text="Создать выдачу", command=add_db).grid(row=6, column=1, padx=10,pady=10, stick='we')
+    btn_all_clear = tk.Button(new_win, text="Очистить", command=all_clear).grid(row=6, column=0, padx=10,pady=10, stick='we')
+
+def delete_issue():
+    new_win = tk.Toplevel(win)
+    new_win.geometry("1519x300+500+200")
+    new_win.title("Удалить должника")
+    def show():
+        try:
+            with connection.cursor() as cursor:
+                query = ("SELECT * FROM Loans")
+                query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id;")
+
+                cursor.execute(query)
+                results = cursor.fetchall()
+        finally:
+            pass
+        for result in results:
+            print(type(result))
+            listBox.insert("", "end", values= (result['id'],result['FirstName'],result['LastName'],result['Class'],result['Title'],result['DateOut'],result['DateDue']))
+
+    cols=('id','Имя','Фамилия','Класс','Название книги','Дата выдачи','Дата возврата')
+    listBox= ttk.Treeview(new_win, columns=cols, show='headings')
+    for col in cols:
+        listBox.heading(col, text=col)
+        listBox.grid(row=1, column=0, columnspan=2)
+    show()
 
 
 
+
+    # Создание прокрутки для списка
+
+
+    # Кнопка для загрузки данных
+    #load_button = tk.Button(new_win, text="Загрузить данные", command=fetch_loans_table)
+    #load_button.pack()
 
 
 
@@ -206,7 +242,7 @@ win.title("База данных школьной библиотеки MySQL")
 btn_add_student=tk.Button(win, text="Добавить ученика",command=add_student).grid(row=0,column=0, padx=10, stick='we')
 btn_add_books=tk.Button(win, text="Добавить книгу",command=add_book).grid(row=1,column=0, padx=10, stick='we')
 btn_issue_book=tk.Button(win, text="Выдать книгу",command=issue_book).grid(row=2,column=0, padx=10, stick='we')
-btn_remove_debtor=tk.Button(win, text="Удалить должника",command=add_student).grid(row=3,column=0, padx=10, stick='we')
+btn_remove_debtor=tk.Button(win, text="Удалить должника",command=delete_issue).grid(row=3,column=0, padx=10, stick='we')
 
 
 btn_show_all_students=tk.Button(win, text="Показать всех учеников",command=add_student).grid(row=0,column=1, padx=10, stick='we')
