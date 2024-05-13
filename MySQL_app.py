@@ -202,11 +202,36 @@ def delete_issue():
     new_win = tk.Toplevel(win)
     new_win.geometry("1519x300+500+200")
     new_win.title("Удалить должника")
+    select = 0
+    def select():
+        global selected
+        selected= tk.Listbox.curselection()
+        print(selected)
+
+    def delete_record():
+        box=tk.Listbox(new_win)
+        selected = listBox.curselection()
+        print(selected)
+        if selected:
+            selected_id = selected[0]
+            # Получение данных выбранной строки
+            selected_data = box.get(selected_id)
+
+
+            try:
+                with connection.cursor() as cursor:
+                    query = (f"Update loans SET Returned = 1 WHERE id = {selected_data}")
+                    cursor.execute(query, (selected_data[0],))
+                    connection.commit()
+                    messagebox.showinfo("Добавление в базу данных", "Выдача успешна добавлена в базу данных")
+            finally:
+                print('успешно')
+                pass
     def show():
         try:
             with connection.cursor() as cursor:
                 query = ("SELECT * FROM Loans")
-                query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id;")
+                query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id WHERE loans.`Returned` = 0;")
 
                 cursor.execute(query)
                 results = cursor.fetchall()
@@ -222,16 +247,8 @@ def delete_issue():
         listBox.heading(col, text=col)
         listBox.grid(row=1, column=0, columnspan=2)
     show()
-
-
-
-
-    # Создание прокрутки для списка
-
-
-    # Кнопка для загрузки данных
-    #load_button = tk.Button(new_win, text="Загрузить данные", command=fetch_loans_table)
-    #load_button.pack()
+    listBox.bind('<<ListboxSelect>>',select)
+    btn_delete_issue = tk.Button(new_win, text="удалить должника", command=delete_record).grid(row=2, column=0, padx=10, pady=10)
 
 
 
