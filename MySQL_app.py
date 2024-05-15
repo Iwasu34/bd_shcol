@@ -200,55 +200,162 @@ def issue_book():
 
 def delete_issue():
     new_win = tk.Toplevel(win)
-    new_win.geometry("1519x300+500+200")
+    new_win.geometry("1446x310+200+200")
     new_win.title("Удалить должника")
     select = 0
     def select():
         global selected
-        selected= tk.Listbox.curselection()
-        print(selected)
+        selected= listBox.selection()
+        item=listBox.item(selected)
+
+
 
     def delete_record():
-        box=tk.Listbox(new_win)
-        selected = listBox.curselection()
-        print(selected)
-        if selected:
-            selected_id = selected[0]
-            # Получение данных выбранной строки
-            selected_data = box.get(selected_id)
-
-
+        selected = listBox.selection()
+        item = listBox.item(selected)
+        if item:
+            selected_id = item["values"][0]
             try:
                 with connection.cursor() as cursor:
-                    query = (f"Update loans SET Returned = 1 WHERE id = {selected_data}")
-                    cursor.execute(query, (selected_data[0],))
+                    query = (f"Update loans SET Returned = 1 WHERE id = {selected_id}")
+                    cursor.execute(query)
                     connection.commit()
                     messagebox.showinfo("Добавление в базу данных", "Выдача успешна добавлена в базу данных")
+                    listBox.delete(*listBox.get_children())
+                    show()
             finally:
-                print('успешно')
                 pass
     def show():
+
         try:
             with connection.cursor() as cursor:
-                query = ("SELECT * FROM Loans")
                 query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id WHERE loans.`Returned` = 0;")
-
                 cursor.execute(query)
                 results = cursor.fetchall()
         finally:
             pass
         for result in results:
-            print(type(result))
-            listBox.insert("", "end", values= (result['id'],result['FirstName'],result['LastName'],result['Class'],result['Title'],result['DateOut'],result['DateDue']))
 
+            listBox.insert("", "end", values= (result['id'],result['FirstName'],result['LastName'],result['Class'],result['Title'],result['DateOut'],result['DateDue']))
     cols=('id','Имя','Фамилия','Класс','Название книги','Дата выдачи','Дата возврата')
     listBox= ttk.Treeview(new_win, columns=cols, show='headings')
     for col in cols:
         listBox.heading(col, text=col)
-        listBox.grid(row=1, column=0, columnspan=2)
+        listBox.grid(row=1, column=0, columnspan=2, padx=20, pady=20)
     show()
-    listBox.bind('<<ListboxSelect>>',select)
+
+    listBox.bind('<<TreeviewSelect>>',delete_record)
     btn_delete_issue = tk.Button(new_win, text="удалить должника", command=delete_record).grid(row=2, column=0, padx=10, pady=10)
+def view_students():
+    def show():
+
+        try:
+            with connection.cursor() as cursor:
+
+                query = ("SELECT * FROM `students`")
+                cursor.execute(query)
+                results = cursor.fetchall()
+        finally:
+            pass
+        for result in results:
+
+            listBox.insert("", "end", values= (result['Id'],result['FirstName'],result['LastName'],result['Class'], result['Grade']))
+
+
+    new_win = tk.Toplevel(win)
+    new_win.geometry("1046x300+200+200")
+    new_win.title("Список учеников")
+
+    cols=('id','Имя','Фамилия','Класс','Рейтинг')
+    listBox= ttk.Treeview(new_win, columns=cols, show='headings')
+    for col in cols:
+        listBox.heading(col, text=col)
+        listBox.grid(row=1, column=0, columnspan=2, padx=20, pady=20)
+    show()
+def view_books():
+    def show():
+
+        try:
+            with connection.cursor() as cursor:
+
+                query = ("SELECT * FROM `books`")
+                cursor.execute(query)
+                results = cursor.fetchall()
+        finally:
+            pass
+        for result in results:
+
+            listBox.insert("", "end", values= (result['id'],result['Title'],result['Author'],result['Genre'], result['Year'], result['Pages'], result['Description']))
+
+
+    new_win = tk.Toplevel(win)
+    new_win.geometry("1446x300+200+200")
+    new_win.title("Список учеников")
+
+    cols=('id','Название','Автор','Жанр','Год','Страниц','Описание')
+    listBox= ttk.Treeview(new_win, columns=cols, show='headings')
+    for col in cols:
+        listBox.heading(col, text=col)
+        listBox.grid(row=1, column=0, columnspan=2, padx=20, pady=20)
+    show()
+def view_loans():
+    def show():
+
+        try:
+            with connection.cursor() as cursor:
+
+                query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id")
+                cursor.execute(query)
+                results = cursor.fetchall()
+        finally:
+            pass
+        for result in results:
+            listBox.insert("", "end", values=(
+            result['id'], result['FirstName'], result['LastName'], result['Class'], result['Title'], result['DateOut'],
+            result['DateDue']))
+
+
+
+    new_win = tk.Toplevel(win)
+    new_win.geometry("1446x300+200+200")
+    new_win.title("Список учеников")
+
+    cols = ('id', 'Имя', 'Фамилия', 'Класс', 'Название книги', 'Дата выдачи', 'Дата возврата')
+    listBox= ttk.Treeview(new_win, columns=cols, show='headings')
+    for col in cols:
+        listBox.heading(col, text=col)
+        listBox.grid(row=1, column=0, columnspan=2, padx=20, pady=20)
+    show()
+def view_fines():
+    def show():
+
+        try:
+            with connection.cursor() as cursor:
+
+                query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id WHERE loans.`Returned` = 0;")
+                cursor.execute(query)
+                results = cursor.fetchall()
+        finally:
+            pass
+        for result in results:
+            listBox.insert("", "end", values=(
+            result['id'], result['FirstName'], result['LastName'], result['Class'], result['Title'], result['DateOut'],
+            result['DateDue']))
+
+
+
+    new_win = tk.Toplevel(win)
+    new_win.geometry("1446x300+200+200")
+    new_win.title("Список учеников")
+
+    cols = ('id', 'Имя', 'Фамилия', 'Класс', 'Название книги', 'Дата выдачи', 'Срок возврата')
+    listBox= ttk.Treeview(new_win, columns=cols, show='headings')
+    for col in cols:
+        listBox.heading(col, text=col)
+        listBox.grid(row=1, column=0, columnspan=2, padx=20, pady=20)
+    show()
+
+
 
 
 
@@ -262,10 +369,10 @@ btn_issue_book=tk.Button(win, text="Выдать книгу",command=issue_book)
 btn_remove_debtor=tk.Button(win, text="Удалить должника",command=delete_issue).grid(row=3,column=0, padx=10, stick='we')
 
 
-btn_show_all_students=tk.Button(win, text="Показать всех учеников",command=add_student).grid(row=0,column=1, padx=10, stick='we')
-btn_show_all_books=tk.Button(win, text="Показать все книги",command=add_student).grid(row=1,column=1, padx=10, stick='we')
-btn_show_all_issue=tk.Button(win, text="Показать все выдачи",command=add_student).grid(row=2,column=1, padx=10, stick='we')
-btn_show_all_debtor=tk.Button(win, text="Показать всех должников",command=add_student).grid(row=3,column=1, padx=10, stick='we')
+btn_show_all_students=tk.Button(win, text="Показать всех учеников",command=view_students).grid(row=0,column=1, padx=10, stick='we')
+btn_show_all_books=tk.Button(win, text="Показать все книги",command=view_books).grid(row=1,column=1, padx=10, stick='we')
+btn_show_all_issue=tk.Button(win, text="Показать все выдачи",command=view_loans).grid(row=2,column=1, padx=10, stick='we')
+btn_show_all_debtor=tk.Button(win, text="Показать всех должников",command=view_fines).grid(row=3,column=1, padx=10, stick='we')
 
 for c in range(4): win.rowconfigure(index=c, minsize=60)
 win.columnconfigure(1, pad=10)
