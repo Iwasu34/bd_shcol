@@ -21,7 +21,6 @@ def choice_mongo():
     subprocess.Popen(['.venv/Scripts/python.exe', 'MongoDB_app.py'])
     time.sleep(1)
     win.destroy()
-
 win = tk.Tk()
 
 win.protocol("WM_DELETE_WINDOW", on_closing)
