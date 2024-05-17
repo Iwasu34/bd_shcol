@@ -2,7 +2,7 @@
 from datetime import timedelta, date, datetime
 import tkinter as tk
 from tkinter import ttk
-from tkinter import scrolledtext
+
 import pymysql
 from config import host, user, password, db_name
 from tkinter import messagebox
@@ -202,11 +202,7 @@ def delete_issue():
     new_win = tk.Toplevel(win)
     new_win.geometry("1446x310+200+200")
     new_win.title("Удалить должника")
-    select = 0
-    def select():
-        global selected
-        selected= listBox.selection()
-        item=listBox.item(selected)
+
 
 
 
