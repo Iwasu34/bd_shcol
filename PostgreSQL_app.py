@@ -10,8 +10,8 @@ import time
 
 def add_student():
     def add_db():
-        value_first_name = First_name.get()
-        value_last_name = Last_name.get()
+        value_first_name = First_name.get().title()
+        value_last_name = Last_name.get().title()
         value_classes = Classes.get()
         try:
             connection = psycopg2.connect(
@@ -65,18 +65,30 @@ def add_student():
     btn_all_clear = tk.Button(new_win, text="Очистить", command=all_clear).grid(row=3, column=0, padx=10,pady=10, stick='we')
 def add_book():
     def add_db():
-        value_Title = Title.get()
-        value_Author = Author.get()
-        value_Genre = Genre.get()
+        value_Title = Title.get().title()
+        value_Author = Author.get().title()
+        value_Genre = Genre.get().title()
         value_Year = Year.get()
         value_Pages = Pages.get()
-        value_Description = Description.get()
+        value_Description = Description.get().title()
         try:
-            with connection.cursor() as cursor:
-                insert_query = f"INSERT INTO `books` (Title, Author, Genre, Year, Pages, Description) VALUES ('{value_Title}','{value_Author}','{value_Genre}','{value_Year}','{value_Pages}','{value_Description}');"
-                cursor.execute(insert_query)
-                connection.commit()
-                messagebox.showinfo("Добавление в базу данных", "Книга успешно добавлена в базу данных")
+            connection = psycopg2.connect(
+                host=host,
+                port=5432,
+                user=user_postgre,
+                password=password_postgre,
+                dbname=db_name_postgre,
+                options="-c search_path=dbo,librarydb_postgre"
+
+            )
+            cursor = connection.cursor()
+            insert_query = f'INSERT INTO books ("Title", "Author", "Genre", "Year", "Pages", "Description") VALUES (\'{value_Title}\',\'{value_Author}\',\'{value_Genre}\',\'{value_Year}\',\'{value_Pages}\',\'{value_Description}\');'
+            cursor.execute(insert_query)
+            connection.commit()
+            messagebox.showinfo("Добавление в базу данных", "Книга успешно добавлена в базу данных")
+            cursor.close()
+            connection.close()
+
         finally:
             #connection.close()
             all_clear_sucses()
@@ -177,9 +189,9 @@ def issue_book():
     entry_dateOut.grid(row=1, column=4, padx=10, pady=2,stick='w')
 
     def add_db():
-        value_student = entry_students.get()
-        value_book = entry_books.get()
-        value_bibliotekr = entry_bibliotekrs.get()
+        value_student = entry_students.get().title()
+        value_book = entry_books.get().title()
+        value_bibliotekr = entry_bibliotekrs.get().title()
         value_datedue = entry_dateDue.get()
         date_obj = datetime.strptime(value_datedue, "%d.%m.%Y")
         value_datedue = date_obj.strftime("%Y-%m-%d")
@@ -187,22 +199,38 @@ def issue_book():
         date_obj = datetime.strptime(value_dateout, "%d.%m.%Y")
         value_dateout = date_obj.strftime("%Y-%m-%d")
         try:
-            with connection.cursor() as cursor:
-                query_student = f"SELECT Id FROM `students` WHERE `LastName` LIKE '{value_student}%'"
-                query_book = f"SELECT Id FROM `books` WHERE `Title` LIKE '{value_book}%'"
-                query_librarian = f"SELECT Id FROM `librarians` WHERE `LastName`  LIKE '{value_bibliotekr}%'"
+            connection = psycopg2.connect(
+                host=host,
+                port=5432,
+                user=user_postgre,
+                password=password_postgre,
+                dbname=db_name_postgre,
+                options="-c search_path=dbo,librarydb_postgre"
+
+            )
+            cursor = connection.cursor()
 
 
-                cursor.execute(query_student)
-                result_student = cursor.fetchone().get("Id")
-                cursor.execute(query_book)
-                result_book = cursor.fetchone().get("Id")
-                cursor.execute(query_librarian)
-                result_librarian = cursor.fetchone().get("Id")
-                insert_query = f"INSERT INTO `loans` (StudentId, BookId, LibrariansId, DateOut, DateDue) VALUES ('{result_student}','{result_book}','{result_librarian}','{value_datedue}','{value_dateout}');"
-                cursor.execute(insert_query)
-                connection.commit()
-                messagebox.showinfo("Добавление в базу данных", "Выдача успешна добавлена в базу данных")
+            query_student = f'SELECT "Id" FROM students WHERE "LastName" LIKE \'{value_student}%\''
+            query_book = f'SELECT "id" FROM books WHERE "Title" LIKE \'{value_book}%\''
+            query_librarian = f'SELECT "id" FROM librarians WHERE "Lastname"  LIKE \'{value_bibliotekr}%\''
+
+
+            cursor.execute(query_student)
+            result_student = cursor.fetchone()[0]
+            print(result_student)
+            cursor.execute(query_book)
+            result_book = cursor.fetchone()[0]
+            print(result_book)
+            cursor.execute(query_librarian)
+            result_librarian = cursor.fetchone()[0]
+            print(result_librarian)
+            insert_query = f'INSERT INTO loans ("StudentId", "BookId", "LibrariansId", "DateOut", "DateDue") VALUES (\'{result_student}\',\'{result_book}\',\'{result_librarian}\',\'{value_datedue}\',\'{value_dateout}\');'
+            cursor.execute(insert_query)
+            connection.commit()
+            messagebox.showinfo("Добавление в базу данных", "Выдача успешна добавлена в базу данных")
+            cursor.close()
+            connection.close()
         finally:
             #connection.close()
             all_clear_sucses()
@@ -223,27 +251,48 @@ def delete_issue():
         if item:
             selected_id = item["values"][0]
             try:
-                with connection.cursor() as cursor:
-                    query = (f"Update loans SET Returned = 1 WHERE id = {selected_id}")
-                    cursor.execute(query)
-                    connection.commit()
-                    messagebox.showinfo("Добавление в базу данных", "Выдача успешна добавлена в базу данных")
-                    listBox.delete(*listBox.get_children())
-                    show()
+                connection = psycopg2.connect(
+                    host=host,
+                    port=5432,
+                    user=user_postgre,
+                    password=password_postgre,
+                    dbname=db_name_postgre,
+                    options="-c search_path=dbo,librarydb_postgre"
+                )
+                cursor = connection.cursor()
+                query = (f'Update loans SET "Returned" = True WHERE id = \'{selected_id}\'')
+                cursor.execute(query)
+                connection.commit()
+                messagebox.showinfo("Удаление должника", "Отметка о возврате добавлена в базу данных")
+                cursor.close()
+                connection.close()
+                listBox.delete(*listBox.get_children())
+                show()
             finally:
                 pass
     def show():
 
         try:
-            with connection.cursor() as cursor:
-                query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id WHERE loans.`Returned` = 0;")
-                cursor.execute(query)
-                results = cursor.fetchall()
+            connection = psycopg2.connect(
+                host=host,
+                port=5432,
+                user=user_postgre,
+                password=password_postgre,
+                dbname=db_name_postgre,
+                options="-c search_path=dbo,librarydb_postgre"
+            )
+            cursor = connection.cursor()
+            query= ('SELECT loans.id,students."FirstName" ,students."LastName" ,students."Class" ,books."Title" ,loans."DateOut",loans."DateDue" FROM loans LEFT JOIN students ON loans."StudentId"  = students."Id" LEFT JOIN books ON loans."BookId"  = books.id WHERE loans."Returned"  = false  ;')
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            connection.close()
+
         finally:
             pass
         for result in results:
 
-            listBox.insert("", "end", values= (result['id'],result['FirstName'],result['LastName'],result['Class'],result['Title'],result['DateOut'],result['DateDue']))
+            listBox.insert("", "end", values= (result[0],result[1],result[2],result[3],result[4],result[5],result[6]))
     cols=('id','Имя','Фамилия','Класс','Название книги','Дата выдачи','Дата возврата')
     listBox= ttk.Treeview(new_win, columns=cols, show='headings')
     for col in cols:
@@ -257,16 +306,26 @@ def view_students():
     def show():
 
         try:
-            with connection.cursor() as cursor:
+            connection = psycopg2.connect(
+                host=host,
+                port=5432,
+                user=user_postgre,
+                password=password_postgre,
+                dbname=db_name_postgre,
+                options="-c search_path=dbo,librarydb_postgre"
+            )
+            cursor = connection.cursor()
+            query = ("SELECT * FROM students")
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            connection.close()
 
-                query = ("SELECT * FROM `students`")
-                cursor.execute(query)
-                results = cursor.fetchall()
         finally:
             pass
         for result in results:
 
-            listBox.insert("", "end", values= (result['Id'],result['FirstName'],result['LastName'],result['Class'], result['Grade']))
+            listBox.insert("", "end", values= (result[0],result[1],result[2],result[3], result[4]))
 
 
     new_win = tk.Toplevel(win)
@@ -283,16 +342,25 @@ def view_books():
     def show():
 
         try:
-            with connection.cursor() as cursor:
-
-                query = ("SELECT * FROM `books`")
-                cursor.execute(query)
-                results = cursor.fetchall()
+            connection = psycopg2.connect(
+                host=host,
+                port=5432,
+                user=user_postgre,
+                password=password_postgre,
+                dbname=db_name_postgre,
+                options="-c search_path=dbo,librarydb_postgre"
+            )
+            cursor = connection.cursor()
+            query = ("SELECT * FROM books")
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            connection.close()
         finally:
             pass
         for result in results:
 
-            listBox.insert("", "end", values= (result['id'],result['Title'],result['Author'],result['Genre'], result['Year'], result['Pages'], result['Description']))
+            listBox.insert("", "end", values= (result[0],result[1],result[2],result[3], result[4], result[5], result[6]))
 
 
     new_win = tk.Toplevel(win)
@@ -309,17 +377,27 @@ def view_loans():
     def show():
 
         try:
-            with connection.cursor() as cursor:
+            connection = psycopg2.connect(
+                host=host,
+                port=5432,
+                user=user_postgre,
+                password=password_postgre,
+                dbname=db_name_postgre,
+                options="-c search_path=dbo,librarydb_postgre"
+            )
+            cursor = connection.cursor()
 
-                query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id")
-                cursor.execute(query)
-                results = cursor.fetchall()
+            query= ('SELECT loans.id,students."FirstName" ,students."LastName" ,students."Class" ,books."Title" ,loans."DateOut",loans."DateDue" FROM loans LEFT JOIN students ON loans."StudentId"  = students."Id" LEFT JOIN books ON loans."BookId"  = books.id;')
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            connection.close()
         finally:
             pass
         for result in results:
             listBox.insert("", "end", values=(
-            result['id'], result['FirstName'], result['LastName'], result['Class'], result['Title'], result['DateOut'],
-            result['DateDue']))
+            result[0], result[1], result[2], result[3], result[4], result[5],
+            result[6]))
 
 
 
@@ -337,17 +415,26 @@ def view_fines():
     def show():
 
         try:
-            with connection.cursor() as cursor:
-
-                query = ("SELECT loans.id, students.FirstName, students.LastName, students.Class, books.Title, loans.DateOut, loans.DateDue FROM loans LEFT JOIN students ON loans.StudentId = students.Id LEFT JOIN books ON loans.BookId = books.Id WHERE loans.`Returned` = 0;")
-                cursor.execute(query)
-                results = cursor.fetchall()
+            connection = psycopg2.connect(
+                host=host,
+                port=5432,
+                user=user_postgre,
+                password=password_postgre,
+                dbname=db_name_postgre,
+                options="-c search_path=dbo,librarydb_postgre"
+            )
+            cursor = connection.cursor()
+            query= ('SELECT loans.id,students."FirstName" ,students."LastName" ,students."Class" ,books."Title" ,loans."DateOut",loans."DateDue" FROM loans LEFT JOIN students ON loans."StudentId"  = students."Id" LEFT JOIN books ON loans."BookId"  = books.id WHERE loans."Returned"  = false  ;')
+            cursor.execute(query)
+            results = cursor.fetchall()
+            cursor.close()
+            connection.close()
         finally:
             pass
         for result in results:
             listBox.insert("", "end", values=(
-            result['id'], result['FirstName'], result['LastName'], result['Class'], result['Title'], result['DateOut'],
-            result['DateDue']))
+            result[0], result[1], result[2], result[3], result[4], result[5],
+            result[6]))
 
 
 
